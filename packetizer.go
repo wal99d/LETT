@@ -34,7 +34,7 @@ var(
 
 //This function will check for Buffer and return error if it's nil and []byte
 func (p *LETTPacket) CheckBuffer() (error, []byte) {
-	if packet, err:=ioutil.ReadAll(p.Buffer); err!=nil && err == io.EOF{
+	if packet, err:=ioutil.ReadAll(p.Buffer); err!=nil || err == io.EOF{
 		return EmptyBuffer , nil
 	}else{
 		return nil, packet		
