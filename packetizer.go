@@ -1,7 +1,7 @@
 package LETT
 
 import(
-	//"fmt"
+	"fmt"
 	"errors"
 )
 
@@ -9,7 +9,7 @@ import(
 type LETTPacket struct{
 	Header byte
 	DestinationAddress byte
-    Length []byte
+    Length [4]byte
     Data []byte
     Checksum []byte
 }
@@ -18,10 +18,10 @@ type Data []byte
 
 //These are const for Headers type in LETT protocol , maximum is 2^8 = 256 values
 const (
-	PUSH = 0x01
-	PULL = 0x02
-	REPUSH = 0x03
-	REPULL =0x04
+	PUSH_READINGS = 0x01
+	PULL_READINGS = 0x02
+	REPUSH_READINGS = 0x03
+	REPULL_READINGS =0x04
 )
 
 //LETT Defined Errors
@@ -44,7 +44,10 @@ func (p *LETTPacket) EncapsulteData(data Data) error {
 	if data !=nil{
 		p.Header = data[0]
 		p.DestinationAddress = data[1]
-		p.Length = data[2:6]
+		length:= data[2:6]
+		for k,v:= range length{
+			p.Length[k]= v
+		}
 		p.Data = data[5:]
 		checksum:=make([]byte, len(data))
 		for k,v :=range data{
@@ -52,6 +55,7 @@ func (p *LETTPacket) EncapsulteData(data Data) error {
 			checksum[k]&=0xff
 		}
 		p.Checksum = checksum
+		//fmt.Printf("%x\n",&p)
 		return nil
 	}else{
 		return NoData
