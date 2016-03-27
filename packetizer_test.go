@@ -34,3 +34,23 @@ func TestGetData(t *testing.T){
 		t.Fatalf("%s\n", err)
 	}
 }
+
+func TestGetChecksum(t *testing.T){
+	p:=LETTPacket{}
+	buf := []byte{0x01,0x01,0xff,0x7f,0x00,0x00,0x11,0x11,0x11,0x11}
+	p.Buffer = bytes.NewReader(buf)
+
+	if err, _:= p.GetChecksum(); err!=nil{
+		t.Fatalf("%s\n", err)
+	}
+}
+
+func TestGetPacket(t *testing.T){
+	p:=LETTPacket{}
+	buf := []byte{0x01,0x01,0xff,0x7f,0x00,0x00,0x11,0x11,0x11,0x11}
+	p.Buffer = bytes.NewReader(buf)
+
+	if err, _:= p.GetPacket(); err!=nil{
+		t.Fatalf("%s\n", err)
+	}
+}
