@@ -85,3 +85,10 @@ func (p *LETTPacket) GetChecksum() (error , uint32){
 		return err , 0
 	}
 }
+
+//This function will create brand new LETTPacket
+func NewLETTPacket(rawBytes io.Reader) *LETTPacket{
+	p:= &LETTPacket{}
+	p.Buffer = rawBytes
+	return p
+}
