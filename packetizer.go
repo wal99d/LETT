@@ -1,75 +1,78 @@
 package LETT
 
 import(
-	"fmt"
+	//"fmt"
 	"errors"
+	"encoding/binary"
+	//"bytes"
+	"io/ioutil"
+	"io"
 )
 
-//LETT Packet consists of [Header : Destination Address: Length of Expected Data : Data it self : Checksum to validate the bytes]
+//LETT Packet consists of [Header : Destination Address: Data itself of 2 Bytes in Size : Checksum to validate the bytes]
 type LETTPacket struct{
-	Header byte
-	DestinationAddress byte
-    Length [4]byte
-    Data []byte
-    Checksum []byte
+	Buffer io.Reader
 }
 
-type Data []byte
+type LETTProtocol struct{
+	Header uint8
+	DestinationAddress uint8
+    Data uint16
+    Checksum uint32
+}
 
 //These are const for Headers type in LETT protocol , maximum is 2^8 = 256 values
 const (
-	PUSH_READINGS = 0x01
-	PULL_READINGS = 0x02
-	REPUSH_READINGS = 0x03
-	REPULL_READINGS =0x04
+	READ = 0x01
+	COMMAND = 0x02
 )
 
 //LETT Defined Errors
 var(
-	NoData = errors.New("There is no available Data on the stream yet")
+	EmptyBuffer = errors.New("Opps Buffer is Empty!!")
 )
 
-//This function will handle Packet processing from TCP/IP and return *Data
-func (p *LETTPacket) GetData() (error, Data) {
-	if p.Data == nil {
-		return NoData , nil
+//This function will check for Buffer and return error if it's nil and []byte
+func (p *LETTPacket) CheckBuffer() (error, []byte) {
+	if packet, err:=ioutil.ReadAll(p.Buffer); err!=nil && err == io.EOF{
+		return EmptyBuffer , nil
 	}else{
-		return nil, p.Data		
-	}
-
-}
-
-//This function will encapsulte Data into LETT/Packet
-func (p *LETTPacket) EncapsulteData(data Data) error {
-	if data !=nil{
-		p.Header = data[0]
-		p.DestinationAddress = data[1]
-		length:= data[2:6]
-		for k,v:= range length{
-			p.Length[k]= v
-		}
-		p.Data = data[5:]
-		checksum:=make([]byte, len(data))
-		for k,v :=range data{
-			checksum[k]+= v
-			checksum[k]&=0xff
-		}
-		p.Checksum = checksum
-		//fmt.Printf("%x\n",&p)
-		return nil
-	}else{
-		return NoData
+		return nil, packet		
 	}
 }
 
-//This function must be called first to sort the Data bytes received from Ethernet before extracting Data 
-func (d Data) BigtoLittleEndian() error{
-	//TODO: Handle conversion from Big 2 Little Endian 
-	return nil
+//This function will handle Packet processing from TCP/IP and return Buffer/[]byte
+func (p *LETTPacket) GetPacket() (error, []byte ) {
+	if err, packet :=p.CheckBuffer(); err ==nil{
+		return nil , packet
+	}else {
+		return err , nil
+	}
 }
 
-//This function must be called first to sort the Data bytes received from Ethernet before extracting Data 
-func (d Data) LittletoBigEndian() error{
-	//TODO: Handle conversion from Little 2 Big Endian 
-	return nil	
-}	
+//This function will return the header from received buffer as uint8
+func (p *LETTPacket) GetHeader() (error , uint8){
+	if err, packet :=p.CheckBuffer(); err ==nil{
+		return nil , packet[0]
+	}else {
+		return err , 0
+	}
+}
+
+//This function will return the DestinationAddress from received buffer as uint8
+func (p *LETTPacket) GetDestinationAddress() (error , uint8){
+	if err, packet :=p.CheckBuffer(); err ==nil{
+		return nil , packet[1]
+	}else {
+		return err , 0
+	}
+}
+
+//This function is used to get the Data form Buffer
+func (p *LETTPacket) GetData() (error , uint16){
+	if err, packet :=p.CheckBuffer(); err ==nil{
+		return nil , binary.BigEndian.Uint16(packet[2:4])
+	}else {
+		return err , 0
+	}
+}

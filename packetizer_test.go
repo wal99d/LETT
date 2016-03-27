@@ -2,15 +2,23 @@ package LETT
 
 import(
 	"testing"
+	"bytes"
 )
 
-func TestEncapsulteDataGetData(t *testing.T){
+func TestGetHeader(t *testing.T){
 	p:=LETTPacket{}
-	data := []byte{0x01,0x01,0xff,0x7f,0x00,0x00,0x11,0x11,0x11}
-	if err:= p.EncapsulteData(data); err!=nil {
+	buf:= []byte{0x01,0x01,0xff,0x7f,0x00,0x00,0x11,0x11,0x11,0x11}
+	p.Buffer = bytes.NewReader(buf)
+	if err, _:= p.GetHeader(); err!=nil{
 		t.Fatalf("%s\n", err)
 	}
-	if err, d:= p.GetData(); err!=nil {
+}
+
+func TestGetDestinationAddress(t *testing.T){
+	p:=LETTPacket{}
+	buf := []byte{0x01,0x01,0xff,0x7f,0x00,0x00,0x11,0x11,0x11,0x11}
+	p.Buffer = bytes.NewReader(buf)
+	if err, _:= p.GetDestinationAddress(); err!=nil{
 		t.Fatalf("%s\n", err)
 	}
 }
