@@ -76,3 +76,12 @@ func (p *LETTPacket) GetData() (error , uint16){
 		return err , 0
 	}
 }
+
+//This function is used to get the checksum form Buffer
+func (p *LETTPacket) GetChecksum() (error , uint32){
+	if err, packet :=p.CheckBuffer(); err ==nil{
+		return nil , binary.BigEndian.Uint32(packet[4:])
+	}else {
+		return err , 0
+	}
+}
