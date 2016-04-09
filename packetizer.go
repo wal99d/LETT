@@ -16,6 +16,7 @@ type LETTPacket struct{
 
 type LETTProtocol struct{
 	Header uint8
+	PacketNumber uint8
 	DestinationAddress uint8
     Data uint16
     Checksum uint32
@@ -25,6 +26,9 @@ type LETTProtocol struct{
 const (
 	READ = 0x01
 	COMMAND = 0x02
+	READ_ACK = 0x03
+	COMMAND_ACK = 0x04
+	//Rest will be reserved for future use...
 )
 
 //LETT Defined Errors
@@ -90,5 +94,7 @@ func (p *LETTPacket) GetChecksum() (error , uint32){
 func NewLETTPacket(rawBytes io.Reader) *LETTPacket{
 	p:= &LETTPacket{}
 	p.Buffer = rawBytes
+	//TODO: Checksum must be added here
+	
 	return p
 }
