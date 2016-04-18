@@ -18,8 +18,8 @@ type LETTProtocol struct{
 	Header uint8
 	PacketNumber uint8
 	DestinationAddress uint8
-    Data uint16
-    Checksum uint32
+    Data []byte
+    Checksum uint8
 }
 
 //These are const for Headers type in LETT protocol , maximum is 2^8 = 256 values
@@ -73,28 +73,30 @@ func (p *LETTPacket) GetDestinationAddress() (error , uint8){
 }
 
 //This function is used to get the Data form Buffer
-func (p *LETTPacket) GetData() (error , uint16){
+func (p *LETTPacket) GetData() (error , []byte){
 	if err, packet :=p.CheckBuffer(); err ==nil{
-		return nil , binary.BigEndian.Uint16(packet[2:4])
+		return nil , packet[2:4]
 	}else {
-		return err , 0
+		return err , nil
 	}
 }
 
 //This function is used to get the checksum form Buffer
-func (p *LETTPacket) GetChecksum() (error , uint32){
+func (p *LETTPacket) GetChecksum() (error , uint8){
 	if err, packet :=p.CheckBuffer(); err ==nil{
-		return nil , binary.BigEndian.Uint32(packet[4:])
+		return nil , packet[4]
 	}else {
 		return err , 0
 	}
 }
 
 //This function will create brand new LETTPacket
-func NewLETTPacket(rawBytes io.Reader) *LETTPacket{
+func NewLETTPacket(lettProto *LETTProtocol) *LETTPacket{
 	p:= &LETTPacket{}
+	//TODO:Convert lettProto to io.Reader
+
 	p.Buffer = rawBytes
-	//TODO: Checksum must be added here
 	
 	return p
 }
+
