@@ -22,5 +22,5 @@ func handleConnection(conn net.Conn){
 	defer conn.Close()
 	//He we need to handle each byte received from client and get all data need and display it
 	lettproto,_:=lett.GetLETTProtocolPacket(&conn)
-	fmt.Println("LETT Haader:",lettproto.Header) 
+	fmt.Println("LETT Header:",lettproto.Header) 
 }
